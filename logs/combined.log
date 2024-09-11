@@ -834,3 +834,17 @@
 {"level":"info","message":"PUT /Dshelf/v1/books/mark_as_sold","timestamp":"2024-08-19T20:11:31.688Z"}
 {"level":"info","message":"PUT /Dshelf/v1/books/edit_listing","timestamp":"2024-08-19T20:14:02.315Z"}
 {"level":"info","message":"PUT /Dshelf/v1/books/edit_listing","timestamp":"2024-08-19T20:15:17.938Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:03:07.566Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:05:57.750Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:06:17.943Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:08:50.165Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:09:47.298Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:15:17.903Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:29:35.950Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T13:33:02.752Z"}
+{"level":"info","message":"POST /Dshelf/v1/auth/login","timestamp":"2024-09-11T20:06:12.619Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T20:08:31.396Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T20:13:04.628Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T20:16:07.979Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T20:16:49.835Z"}
+{"level":"info","message":"POST /Dshelf/v1/books/post_listing","timestamp":"2024-09-11T20:17:06.913Z"}

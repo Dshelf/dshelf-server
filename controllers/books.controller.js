@@ -178,22 +178,27 @@ exports.CreateListing = async (req, res, next) => {
       category,
     } = req.body;
 
+    console.log(req.file, "filetest", req.body);
     const file = req.file; // Assuming you're using a middleware like multer to handle file uploads
     if (!file) {
       return next(new ErrorResponse("product images are very needed", 404));
     }
+    // Check if any required field is missing
+    const requiredFields = [
+      "book_name",
+      "author_name",
+      "location",
+      "price",
+      "condition",
+      "defects",
+      "description",
+      "category",
+    ];
 
-    if (
-      book_name === "" ||
-      author_name === "" ||
-      location === "" ||
-      price === "" ||
-      condition === "" ||
-      defects === "" ||
-      description === "" ||
-      category === ""
-    ) {
-      return next(new ErrorResponse("body data must be provided", 404));
+    for (let field of requiredFields) {
+      if (!req.body[field]) {
+        return next(new ErrorResponse(`${field} is required`, 400));
+      }
     }
 
     const uploadedImageUrl = await uploadImage(file, req.user._id);
