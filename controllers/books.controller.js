@@ -176,6 +176,7 @@ exports.CreateListing = async (req, res, next) => {
       defects,
       description,
       category,
+      whatsappLink,
     } = req.body;
 
     console.log(req.file, "filetest", req.body);
@@ -193,6 +194,7 @@ exports.CreateListing = async (req, res, next) => {
       "defects",
       "description",
       "category",
+      "whatsappLink",
     ];
 
     for (let field of requiredFields) {
@@ -215,6 +217,7 @@ exports.CreateListing = async (req, res, next) => {
       description: description,
       isListed: true,
       img_url: uploadedImageUrl,
+      whatsappLink: whatsappLink,
     });
 
     newBook.save();

@@ -13,6 +13,7 @@ const bookSchema = mongoose.Schema(
     description: { type: String },
     isListed: { type: Boolean },
     category: { type: String },
+    whatsappLink: { type: String },
     img_url: { type: String },
   },
   { timestamps: true }
