@@ -56,7 +56,7 @@ exports.GetOwnListing = async (req, res, next) => {
 
 exports.GetListings = async (req, res, next) => {
   try {
-    // Pagination
+    // Pagination setup
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
     const startIndex = (page - 1) * limit;
@@ -68,13 +68,10 @@ exports.GetListings = async (req, res, next) => {
 
     // Convert query string to MongoDB query
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(
-      /\b(gt|gte|lt|lte|in)\b/g,
-      (match) => `$${match}`
-    );
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
     queryObj = JSON.parse(queryStr);
 
-    // Execute query
+    // Execute base query
     let query = Books.find(queryObj);
 
     // Sorting
@@ -88,43 +85,34 @@ exports.GetListings = async (req, res, next) => {
     // Counting total documents
     const totalDocuments = await Books.countDocuments(queryObj);
 
-    // Applying pagination
+    // Apply pagination
     query = query.skip(startIndex).limit(limit);
 
-    // Execute query
+    // Execute query to get listings
     const listings = await query;
-
-    if (listings.length === 0) {
-      return next(new ErrorResponse("No listings found", 404));
-    }
 
     // Pagination result
     const pagination = {};
-
     if (startIndex > 0) {
-      pagination.prev = {
-        page: page - 1,
-        limit: limit,
-      };
+      pagination.prev = { page: page - 1, limit: limit };
     }
-
     if (startIndex + listings.length < totalDocuments) {
-      pagination.next = {
-        page: page + 1,
-        limit: limit,
-      };
+      pagination.next = { page: page + 1, limit: limit };
     }
 
+    // Response
     res.status(200).json({
-      status: true,
+      success: true,
       count: listings.length,
       pagination,
       data: listings,
+      message: listings.length === 0 ? "No listings found" : "Listings retrieved successfully",
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 exports.GetParticularListed = async (req, res, next) => {
   const { listing_id } = req.params;
