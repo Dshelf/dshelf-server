@@ -102,7 +102,7 @@ exports.GetListings = async (req, res, next) => {
 
     // Response
     res.status(200).json({
-      success: true,
+      status: true,
       count: listings.length,
       pagination,
       data: listings,
