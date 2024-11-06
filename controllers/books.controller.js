@@ -331,34 +331,44 @@ exports.GetByCategory = async (req, res, next) => {
   try {
     const { category } = req.params;
 
-    // Pagination
+    // Pagination setup
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
     const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
 
-    const totalDocuments = await Books.countDocuments();
-    const books = await Books.find({ category: category })
+    // Count documents matching the category filter
+    const totalDocuments = await Books.countDocuments({ category });
+
+    // Retrieve books for the given category with pagination
+    const books = await Books.find({ category })
       .skip(startIndex)
       .limit(limit);
 
+    // Handle case where no books are found for the specified category
+    if (books.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No books found in this category",
+      });
+    }
+
+    // Setup pagination details
     const pagination = {};
-
-    if (endIndex < totalDocuments) {
-      pagination.next = {
-        page: page + 1,
-        limit: limit,
-      };
-    }
-
     if (startIndex > 0) {
-      pagination.prev = {
-        page: page - 1,
-        limit: limit,
-      };
+      pagination.prev = { page: page - 1, limit };
+    }
+    if (startIndex + books.length < totalDocuments) {
+      pagination.next = { page: page + 1, limit };
     }
 
-    return res.status(200).json({ status: true, data: books, pagination });
+    // Return success response with book data and pagination
+    res.status(200).json({
+      status: true,
+      count: books.length,
+      pagination,
+      data: books,
+      message: "Books retrieved successfully",
+    });
   } catch (error) {
     next(error);
   }
