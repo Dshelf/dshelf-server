@@ -16,25 +16,27 @@ get all disputes associated with an account
 */
 exports.GetOwnListing = async (req, res, next) => {
   try {
-    // Pagination
+    // Updated pagination to allow for larger page sizes
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = parseInt(req.query.limit) || 10; // Increased default limit
     const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+
     const totalDocuments = await Books.countDocuments({
       owner: req.user._id,
     });
+
     const listings = await Books.find({ owner: req.user._id })
+      .sort("-createdAt") // Added sorting by creation date
       .skip(startIndex)
       .limit(limit);
 
     if (!listings) {
-      return next(new ErrorResponse("listings not found"), 201);
+      return next(new ErrorResponse("listings not found"), 404); // Changed status code to 404
     }
 
     const pagination = {};
 
-    if (endIndex < totalDocuments) {
+    if (startIndex + listings.length < totalDocuments) {
       pagination.next = {
         page: page + 1,
         limit: limit,
@@ -48,7 +50,14 @@ exports.GetOwnListing = async (req, res, next) => {
       };
     }
 
-    res.status(200).json({ status: true, data: listings, pagination });
+    res.status(200).json({
+      status: true,
+      data: listings,
+      pagination,
+      total: totalDocuments,
+      currentPage: page,
+      totalPages: Math.ceil(totalDocuments / limit),
+    });
   } catch (error) {
     next(error);
   }
@@ -56,42 +65,37 @@ exports.GetOwnListing = async (req, res, next) => {
 
 exports.GetListings = async (req, res, next) => {
   try {
-    // Pagination setup
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = parseInt(req.query.limit) || 10; // Increased default limit
     const startIndex = (page - 1) * limit;
 
-    // Build query
     let queryObj = { ...req.query };
     const excludeFields = ["page", "limit", "sort"];
     excludeFields.forEach((field) => delete queryObj[field]);
 
-    // Convert query string to MongoDB query
+    // Add isListed filter to only show active listings
+    queryObj.isListed = true;
+
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`
+    );
     queryObj = JSON.parse(queryStr);
 
-    // Execute base query
     let query = Books.find(queryObj);
 
-    // Sorting
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
-      query = query.sort("-createdAt"); // Default sort by newest
+      query = query.sort("-createdAt");
     }
 
-    // Counting total documents
     const totalDocuments = await Books.countDocuments(queryObj);
-
-    // Apply pagination
     query = query.skip(startIndex).limit(limit);
-
-    // Execute query to get listings
     const listings = await query;
 
-    // Pagination result
     const pagination = {};
     if (startIndex > 0) {
       pagination.prev = { page: page - 1, limit: limit };
@@ -100,19 +104,23 @@ exports.GetListings = async (req, res, next) => {
       pagination.next = { page: page + 1, limit: limit };
     }
 
-    // Response
     res.status(200).json({
       status: true,
       count: listings.length,
       pagination,
       data: listings,
-      message: listings.length === 0 ? "No listings found" : "Listings retrieved successfully",
+      total: totalDocuments,
+      currentPage: page,
+      totalPages: Math.ceil(totalDocuments / limit),
+      message:
+        listings.length === 0
+          ? "No listings found"
+          : "Listings retrieved successfully",
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 exports.GetParticularListed = async (req, res, next) => {
   const { listing_id } = req.params;
@@ -130,12 +138,17 @@ exports.GetParticularListed = async (req, res, next) => {
 
 const uploadImage = (file, userId) => {
   return new Promise((resolve, reject) => {
-    const uniqueFilename = `${userId}`;
+    // Generate a unique filename using timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const uniqueFilename = `${userId}_${timestamp}_${randomString}`;
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "deshelf",
         public_id: uniqueFilename,
         resource_type: "auto",
+        overwrite: false, // Prevent overwriting existing images
       },
       (error, result) => {
         if (error) reject(error);
@@ -333,16 +346,14 @@ exports.GetByCategory = async (req, res, next) => {
 
     // Pagination setup
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = parseInt(req.query.limit) || 7;
     const startIndex = (page - 1) * limit;
 
     // Count documents matching the category filter
     const totalDocuments = await Books.countDocuments({ category });
 
     // Retrieve books for the given category with pagination
-    const books = await Books.find({ category })
-      .skip(startIndex)
-      .limit(limit);
+    const books = await Books.find({ category }).skip(startIndex).limit(limit);
 
     // Handle case where no books are found for the specified category
     if (books.length === 0) {
