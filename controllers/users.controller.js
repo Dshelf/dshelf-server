@@ -19,7 +19,7 @@ exports.ForgetPasswordRequest = async (req, res, next) => {
     const secret = process.env.JWT_SECRET + user.password;
     const payload = { email: user.email, id: user._id };
     const token = jwt.sign(payload, secret, { expiresIn: "1h" });
-    const link = `http://localhost:5173/reset-password/?token=${token}&user=${user._id}`;
+    const link = `http://localhost:5173/auth/reset-password/?token=${token}&user=${user._id}`;
 
     // Await email sending and handle potential errors
     const emailResponse = await sendPasswordEmail(link, email, next);

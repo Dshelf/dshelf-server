@@ -876,3 +876,10 @@
 {"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:33:46.798Z"}
 {"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:33:50.346Z"}
 {"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:41:35.221Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:58:48.960Z"}
+{"level":"info","message":"PUT /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-14T08:02:02.957Z"}
+{"level":"info","message":"POST /Dshelf/v1/auth/login","timestamp":"2024-11-14T08:06:21.001Z"}
+{"level":"info","message":"PUT /Dshelf/v1/user/updatePassword","timestamp":"2024-11-14T08:06:33.408Z"}
+{"level":"info","message":"PUT /Dshelf/v1/user/updatePassword","timestamp":"2024-11-14T08:06:35.892Z"}
+{"level":"info","message":"POST /Dshelf/v1/auth/login","timestamp":"2024-11-14T08:06:58.538Z"}
+{"level":"info","message":"PUT /Dshelf/v1/user/updatePassword","timestamp":"2024-11-14T08:07:31.374Z"}
