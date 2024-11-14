@@ -866,3 +866,13 @@
 {"level":"info","message":"GET /Dshelf/v1/books/get_listings","timestamp":"2024-11-05T14:54:22.408Z"}
 {"level":"info","message":"GET /Dshelf/v1/books/get_listings","timestamp":"2024-11-05T15:08:59.907Z"}
 {"level":"info","message":"GET /Dshelf/v1/books/get_listings","timestamp":"2024-11-05T15:37:32.597Z"}
+{"level":"info","message":"GET /","timestamp":"2024-11-13T18:41:49.354Z"}
+{"level":"info","message":"GET /","timestamp":"2024-11-13T18:41:57.589Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/:email?=iyanudina@gmail.com","timestamp":"2024-11-13T19:51:26.713Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/:email?=iyanudina@gmail.com","timestamp":"2024-11-13T19:53:27.907Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:17:12.785Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:24:14.056Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:27:11.664Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:33:46.798Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:33:50.346Z"}
+{"level":"info","message":"GET /Dshelf/v1/user/forgetPasswordRequest/iyanudina@gmail.com","timestamp":"2024-11-14T07:41:35.221Z"}

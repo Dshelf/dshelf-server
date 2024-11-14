@@ -10,6 +10,9 @@ const sendEmail = (otp, reciepient, next) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      tls: {
+        rejectUnauthorized: false, // Bypass SSL verification
+      },
     });
 
     // Email content
@@ -72,35 +75,40 @@ const sendEmail = (otp, reciepient, next) => {
   }
 };
 
-const sendPasswordEmail = (info, reciepient, next) => {
+const sendPasswordEmail = async (link, recipient, next) => {
   try {
-    // Create a transporter object using your SMTP server details
+    // Set up transporter
     const transporter = nodemailer.createTransport({
-      service: "Gmail", // e.g., "Gmail", "Outlook", "Yahoo", or use your SMTP server details
+      service: "Gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      tls: {
+        rejectUnauthorized: false, // Bypass SSL verification
+      },
     });
 
-    // Email content
+    // Define email options
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: reciepient,
-      subject: "Hello from Saturn",
-      text: `This is a test email sent to reset password. ${info} `,
+      to: recipient,
+      subject: "Password Reset Request",
+      text: `Please use the following link to reset your password: ${link}`,
     };
 
-    // Send email
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        return { status: false, message: error };
-      } else {
-        return { status: true, message: info };
-      }
-    });
+    // Attempt to send email
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent: ${info.response}`);
+    return info.response;
   } catch (error) {
-    next(error);
+    console.error("Error sending email:", error);
+    next(
+      new ErrorResponse(
+        "Failed to send reset email. Please try again later.",
+        500
+      )
+    );
   }
 };
 
@@ -112,6 +120,9 @@ const sendPaymentInfo = (info, reciepient, next) => {
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // Bypass SSL verification
       },
     });
 
