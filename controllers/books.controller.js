@@ -148,7 +148,11 @@ const uploadImage = (file, userId) => {
         folder: "deshelf",
         public_id: uniqueFilename,
         resource_type: "auto",
-        overwrite: false, // Prevent overwriting existing images
+        overwrite: false,
+        unique_filename: true,
+        use_filename: true,
+        timestamp: timestamp, // Add timestamp to URL
+        transformation: [{ quality: "auto" }, { fetch_format: "auto" }],
       },
       (error, result) => {
         if (error) reject(error);
