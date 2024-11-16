@@ -284,8 +284,8 @@ exports.EditListing = async (req, res, next) => {
           await cloudinary.uploader.destroy(publicId);
         }
 
-        // Upload new image
-        const newImageUrl = await uploadImage(req.file);
+        // Upload new image with userId
+        const newImageUrl = await uploadImage(req.file, req.user._id);
         book.img_url = newImageUrl;
       } catch (uploadError) {
         return next(new ErrorResponse("Error managing image upload", 500));
