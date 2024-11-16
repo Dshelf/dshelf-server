@@ -147,14 +147,16 @@ const uploadImage = (file, userId) => {
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
     if (!allowedTypes.includes(file.mimetype)) {
-      reject(new Error("Invalid file type. Only JPEG, PNG and WEBP are allowed."));
+      reject(
+        new Error("Invalid file type. Only JPEG, PNG and WEBP are allowed.")
+      );
       return;
     }
 
     // Generate unique identifiers
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
-    
+
     // Create a unique public_id for Cloudinary
     const uniquePublicId = `deshelf/${userId}/${timestamp}_${randomString}`;
 
@@ -168,8 +170,8 @@ const uploadImage = (file, userId) => {
         transformation: [
           { quality: "auto" },
           { fetch_format: "auto" },
-          { width: 1200, crop: "limit" }
-        ]
+          { width: 1200, crop: "limit" },
+        ],
       },
       (error, result) => {
         if (error) {
@@ -192,8 +194,6 @@ const uploadImage = (file, userId) => {
  */
 exports.CreateListing = async (req, res, next) => {
   try {
-    // I check the type
-    //from the type I
     const {
       book_name,
       author_name,
@@ -206,12 +206,13 @@ exports.CreateListing = async (req, res, next) => {
       whatsappLink,
     } = req.body;
 
-    console.log(req.file, "filetest", req.body);
-    const file = req.file; // Assuming you're using a middleware like multer to handle file uploads
-    if (!file) {
-      return next(new ErrorResponse("product images are very needed", 404));
+    console.log("Creating new listing with file:", req.file?.originalname);
+
+    if (!req.file) {
+      return next(new ErrorResponse("Product image is required", 404));
     }
-    // Check if any required field is missing
+
+    // Check required fields
     const requiredFields = [
       "book_name",
       "author_name",
@@ -230,30 +231,34 @@ exports.CreateListing = async (req, res, next) => {
       }
     }
 
-    const uploadedImageUrl = await uploadImage(file, req.user._id);
+    // Upload image with unique identifier
+    const uploadedImageUrl = await uploadImage(req.file, req.user._id);
+    console.log("Image uploaded successfully:", uploadedImageUrl);
 
     const newBook = new Books({
       title: book_name,
-      author_name: author_name,
-      price: price,
-      category: category,
+      author_name,
+      price,
+      category,
       owner: req.user._id,
-      location: location,
-      condition: condition,
-      defects: defects,
-      description: description,
+      location,
+      condition,
+      defects,
+      description,
       isListed: true,
       img_url: uploadedImageUrl,
-      whatsappLink: whatsappLink,
+      whatsappLink,
     });
 
-    newBook.save();
+    await newBook.save();
+    console.log("New book created with ID:", newBook._id);
 
     return res.status(200).json({
       status: true,
       data: newBook,
     });
   } catch (error) {
+    console.error("Error in CreateListing:", error);
     next(error);
   }
 };
@@ -262,16 +267,16 @@ exports.CreateListing = async (req, res, next) => {
 // Updated helper function to get public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
   try {
-    const urlParts = url.split('/');
-    const transformationIndex = urlParts.indexOf('upload');
+    const urlParts = url.split("/");
+    const transformationIndex = urlParts.indexOf("upload");
     if (transformationIndex !== -1) {
       // Get everything after 'upload' up to the file extension
-      const publicIdWithExt = urlParts.slice(transformationIndex + 1).join('/');
-      return publicIdWithExt.split('.')[0];
+      const publicIdWithExt = urlParts.slice(transformationIndex + 1).join("/");
+      return publicIdWithExt.split(".")[0];
     }
     return null;
   } catch (error) {
-    console.error('Error extracting public_id:', error);
+    console.error("Error extracting public_id:", error);
     return null;
   }
 };
@@ -284,14 +289,13 @@ exports.EditListing = async (req, res, next) => {
       return next(new ErrorResponse("Listing does not exist", 404));
     }
 
-    // Check if the user is the owner of the listing
     if (book.owner.toString() !== req.user._id.toString()) {
       return next(
         new ErrorResponse("Not authorized to edit this listing", 403)
       );
     }
 
-    // Update fields from request body
+    // Update fields
     const updateFields = [
       "title",
       "author_name",
@@ -301,30 +305,33 @@ exports.EditListing = async (req, res, next) => {
       "description",
       "location",
     ];
+
     updateFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         book[field] = req.body[field];
       }
     });
 
-    // Handle image upload if a new file is provided
+    // Handle image update
     if (req.file) {
       try {
-        // Delete old image if it exists
+        // Delete old image
         if (book.img_url) {
           const publicId = getPublicIdFromUrl(book.img_url);
-          await cloudinary.uploader.destroy(publicId);
+          if (publicId) {
+            await cloudinary.uploader.destroy(publicId);
+          }
         }
 
-        // Upload new image with userId
+        // Upload new image
         const newImageUrl = await uploadImage(req.file, req.user._id);
         book.img_url = newImageUrl;
       } catch (uploadError) {
+        console.error("Image upload error:", uploadError);
         return next(new ErrorResponse("Error managing image upload", 500));
       }
     }
 
-    // Save the updated book
     await book.save();
 
     return res.status(200).json({
@@ -333,6 +340,7 @@ exports.EditListing = async (req, res, next) => {
       data: book,
     });
   } catch (error) {
+    console.error("Error in EditListing:", error);
     next(error);
   }
 };
