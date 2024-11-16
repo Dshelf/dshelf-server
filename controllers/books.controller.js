@@ -136,27 +136,49 @@ exports.GetParticularListed = async (req, res, next) => {
   }
 };
 
+// Updated uploadImage function with proper unique filename generation
 const uploadImage = (file, userId) => {
   return new Promise((resolve, reject) => {
-    // Generate a unique filename using timestamp and random string
+    if (!file) {
+      reject(new Error("No file provided"));
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      reject(new Error("Invalid file type. Only JPEG, PNG and WEBP are allowed."));
+      return;
+    }
+
+    // Generate unique identifiers
     const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const uniqueFilename = `${userId}_${timestamp}_${randomString}`;
+    const randomString = Math.random().toString(36).substring(2, 15);
+    
+    // Create a unique public_id for Cloudinary
+    const uniquePublicId = `deshelf/${userId}/${timestamp}_${randomString}`;
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "deshelf",
-        public_id: uniqueFilename,
+        public_id: uniquePublicId,
         resource_type: "auto",
         overwrite: false,
         unique_filename: true,
-        use_filename: true,
-        timestamp: timestamp, // Add timestamp to URL
-        transformation: [{ quality: "auto" }, { fetch_format: "auto" }],
+        transformation: [
+          { quality: "auto" },
+          { fetch_format: "auto" },
+          { width: 1200, crop: "limit" }
+        ]
       },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
+        if (error) {
+          console.error("Upload error:", error);
+          reject(error);
+        } else {
+          console.log("Upload successful, URL:", result.secure_url);
+          resolve(result.secure_url);
+        }
       }
     );
 
@@ -237,12 +259,22 @@ exports.CreateListing = async (req, res, next) => {
 };
 
 // Helper function to get public_id from Cloudinary URL
+// Updated helper function to get public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
-  const splitUrl = url.split("/");
-  const filename = splitUrl[splitUrl.length - 1];
-  return filename.split(".")[0]; // Remove file extension
+  try {
+    const urlParts = url.split('/');
+    const transformationIndex = urlParts.indexOf('upload');
+    if (transformationIndex !== -1) {
+      // Get everything after 'upload' up to the file extension
+      const publicIdWithExt = urlParts.slice(transformationIndex + 1).join('/');
+      return publicIdWithExt.split('.')[0];
+    }
+    return null;
+  } catch (error) {
+    console.error('Error extracting public_id:', error);
+    return null;
+  }
 };
-
 exports.EditListing = async (req, res, next) => {
   const { listing_id } = req.body;
   try {
