@@ -33,7 +33,36 @@ const User = require("../models/Users.js");
 //     next(error);
 //   }
 // };
+exports.ForgetPasswordRequest = async (req, res, next) => {
+  try {
+    const { email } = req.body; // Use body instead of params for POST
+    const user = await User.findOne({ email });
 
+    if (!user) {
+      return next(new ErrorResponse("User does not exist", 404));
+    }
+
+    // Generate a unique reset token
+    const secret = process.env.JWT_SECRET + user.password;
+    const payload = { email: user.email, id: user._id };
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+
+    // Construct reset link
+    const link = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}`;
+
+    // Send email
+    const emailResponse = await sendPasswordEmail(link, email);
+    if (!emailResponse) {
+      return next(new ErrorResponse("Failed to send reset email.", 500));
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Password reset email sent." });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * Resets the user's password using the token sent to their email
