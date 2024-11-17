@@ -91,7 +91,41 @@ exports.ForgetPasswordRequest = async (req, res, next) => {
 //     next(error);
 //   }
 // };
+exports.ForgetPasswordUpdate = async (req, res, next) => {
+  const { new_password, token } = req.body;
 
+  try {
+    // Decode token to get user ID
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.id) {
+      return next(new ErrorResponse("Invalid token", 400));
+    }
+
+    const user = await User.findById(decoded.id).select("+password");
+    if (!user) {
+      return next(new ErrorResponse("User does not exist", 404));
+    }
+
+    // Verify token with user-specific secret
+    const secret = process.env.JWT_SECRET + user.password;
+    jwt.verify(token, secret, async (err) => {
+      if (err) {
+        return next(new ErrorResponse("Invalid or expired token", 401));
+      }
+
+      // Hash the new password and save
+      const hashedPassword = await bcrypt.hash(new_password, 10);
+      user.password = hashedPassword;
+      await user.save();
+
+      res
+        .status(200)
+        .json({ success: true, message: "Password updated successfully" });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 /**
  * Updates the authenticated user's password
  */
