@@ -7,61 +7,61 @@ const User = require("../models/Users.js");
 /**
  * Sends a password reset email to the user
  */
-exports.ForgetPasswordRequest = async (req, res, next) => {
-  try {
-    const { email } = req.params;
-    const user = await User.findOne({ email }).select("+password");
+// exports.ForgetPasswordRequest = async (req, res, next) => {
+//   try {
+//     const { email } = req.params;
+//     const user = await User.findOne({ email }).select("+password");
 
-    if (!user) {
-      return next(new ErrorResponse("User does not exist", 404));
-    }
+//     if (!user) {
+//       return next(new ErrorResponse("User does not exist", 404));
+//     }
 
-    const secret = process.env.JWT_SECRET + user.password;
-    const payload = { email: user.email, id: user._id };
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
-    const link = `http://localhost:5173/auth/reset-password/?token=${token}&user=${user._id}`;
+//     const secret = process.env.JWT_SECRET + user.password;
+//     const payload = { email: user.email, id: user._id };
+//     const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+//     const link = `http://localhost:5173/auth/reset-password/?token=${token}&user=${user._id}`;
 
-    // Await email sending and handle potential errors
-    const emailResponse = await sendPasswordEmail(link, email, next);
+//     // Await email sending and handle potential errors
+//     const emailResponse = await sendPasswordEmail(link, email, next);
 
-    if (!emailResponse) {
-      return next(new ErrorResponse("Failed to send reset email.", 500));
-    }
+//     if (!emailResponse) {
+//       return next(new ErrorResponse("Failed to send reset email.", 500));
+//     }
 
-    res.status(200).json({ success: true, message: "Password reset email sent." });
-  } catch (error) {
-    next(error);
-  }
-};
+//     res.status(200).json({ success: true, message: "Password reset email sent." });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 
 /**
  * Resets the user's password using the token sent to their email
- */
-exports.ForgetPasswordUpdate = async (req, res, next) => {
-  const { new_password, token, user_Id } = req.body;
+//  */
+// exports.ForgetPasswordUpdate = async (req, res, next) => {
+//   const { new_password, token, user_Id } = req.body;
 
-  try {
-    const user = await User.findById(user_Id).select("+password");
-    if (!user) {
-      return next(new ErrorResponse("User does not exist", 404));
-    }
+//   try {
+//     const user = await User.findById(user_Id).select("+password");
+//     if (!user) {
+//       return next(new ErrorResponse("User does not exist", 404));
+//     }
 
-    jwt.verify(token, process.env.JWT_SECRET + user.password, async (err, decodedToken) => {
-      if (err) {
-        return next(new ErrorResponse("Invalid or expired token", 401));
-      }
+//     jwt.verify(token, process.env.JWT_SECRET + user.password, async (err, decodedToken) => {
+//       if (err) {
+//         return next(new ErrorResponse("Invalid or expired token", 401));
+//       }
       
-      const hashedPassword = await bcrypt.hash(new_password, 10);
-      user.password = hashedPassword;
-      await user.save();
+//       const hashedPassword = await bcrypt.hash(new_password, 10);
+//       user.password = hashedPassword;
+//       await user.save();
 
-      res.status(200).json({ success: true, message: "Password updated successfully" });
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+//       res.status(200).json({ success: true, message: "Password updated successfully" });
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 /**
  * Updates the authenticated user's password
