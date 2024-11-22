@@ -5,12 +5,8 @@ const { requireAuth } = require("../middlewares/authMiddleware");
 const userController = require("../controllers/users.controller");
 
 //for personal profiles
-router.get(
-  "/forgetPasswordRequest/:email",
-  userController.ForgetPasswordRequest
-);
-
-router.put("/forgetPasswordUpdate", userController.ForgetPasswordUpdate);
+router.post("/forget-password-request", userController.ForgetPasswordRequest);
+router.post("/forget-password-update", userController.ForgetPasswordUpdate); 
 
 router.put("/updatePassword", requireAuth, userController.UpdatePassword);
 
