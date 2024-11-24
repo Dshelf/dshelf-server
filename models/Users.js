@@ -29,6 +29,16 @@ const userSchema = mongoose.Schema(
       minlength: [8, "Minimum password length is 8 characters"],
       select: false,
     },
+
+    // Add these fields for password reset functionality
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      select: false,
+    },
     otp: {
       type: Number,
     },
