@@ -85,16 +85,105 @@ const sendPasswordEmail = async (link, recipient, next) => {
         pass: process.env.EMAIL_PASSWORD,
       },
       tls: {
-        rejectUnauthorized: false, // Bypass SSL verification
+        rejectUnauthorized: false,
       },
     });
+
+    // HTML email template
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333333;
+              margin: 0;
+              padding: 0;
+            }
+            .email-container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f9f9f9;
+            }
+            .email-header {
+              background-color: #ffffff;
+              padding: 20px;
+              text-align: center;
+              border-radius: 8px 8px 0 0;
+            }
+            .email-body {
+              background-color: #ffffff;
+              padding: 20px;
+              margin-top: 20px;
+              border-radius: 8px;
+            }
+            .reset-button {
+              display: inline-block;
+              padding: 12px 24px;
+              margin: 20px 0;
+              background-color: #4CAF50;
+              color: #ffffff !important;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+              text-align: center;
+            }
+            .reset-button:hover {
+              background-color: #45a049;
+            }
+            .footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 12px;
+              color: #666666;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="email-header">
+              <h2 style="color: #333333; margin: 0;">Password Reset Request</h2>
+            </div>
+            <div class="email-body">
+              <p>Hello,</p>
+              <p>We received a request to reset your password. Click the button below to create a new password:</p>
+              
+              <div style="text-align: center;">
+                <a href="${link}" class="reset-button">
+                  Reset Password
+                </a>
+              </div>
+              
+              <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
+              
+              <p>This link will expire in 1 hour for security reasons.</p>
+              
+              <p>Best regards,<br>Your Support Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated message, please do not reply to this email.</p>
+              <p>If you're having trouble clicking the button, copy and paste this URL into your browser:<br>
+                <span style="color: #4CAF50;">${link}</span>
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
 
     // Define email options
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: recipient,
       subject: "Password Reset Request",
-      text: `Please use the following link to reset your password: ${link}`,
+      text: `Please use the following link to reset your password: ${link}`, // Plain text version
+      html: htmlContent, // HTML version
     };
 
     // Attempt to send email

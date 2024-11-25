@@ -65,51 +65,35 @@ exports.ForgetPasswordRequest = async (req, res, next) => {
 };
 
 
-
 exports.ForgetPasswordUpdate = async (req, res, next) => {
-  const { email, new_password, token } = req.body;
+  const { email, new_password } = req.body;
 
   try {
     // Input validation
-    if (!email || !new_password || !token) {
-      return next(new ErrorResponse("Please provide all required fields", 400));
-    }
-
-    // Password strength validation
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(new_password)) {
+    if (!email || !new_password) {
       return next(
-        new ErrorResponse(
-          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-          400
-        )
+        new ErrorResponse("Please provide email and new password", 400)
       );
     }
 
-    // Find user and verify token
+    // Password validation
+    if (new_password.length < 8) {
+      return next(
+        new ErrorResponse("Password must be at least 8 characters long", 400)
+      );
+    }
+
+    // Find user by email
     const user = await User.findOne({
-      email: email.toLowerCase(),
-      resetPasswordToken: token,
-      resetPasswordExpire: { $gt: Date.now() },
+      email: email.toLowerCase().trim(),
     }).select("+password");
 
     if (!user) {
-      return next(new ErrorResponse("Invalid or expired reset token", 400));
-    }
-
-    // Verify JWT token
-    const secret = process.env.JWT_SECRET + user.password;
-    try {
-      jwt.verify(token, secret);
-    } catch (error) {
-      return next(new ErrorResponse("Invalid or expired reset token", 400));
+      return next(new ErrorResponse("User not found", 404));
     }
 
     // Hash and save new password
     user.password = await bcrypt.hash(new_password, 10);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
     await user.save();
 
     res.status(200).json({
@@ -117,10 +101,10 @@ exports.ForgetPasswordUpdate = async (req, res, next) => {
       message: "Password updated successfully",
     });
   } catch (error) {
+    console.error("Password reset error:", error);
     next(error);
   }
 };
-
 /**
  * Updates the authenticated user's password
  */
