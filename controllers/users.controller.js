@@ -4,53 +4,33 @@ const jwt = require("jsonwebtoken");
 const { sendPasswordEmail } = require("../utils/email");
 const User = require("../models/Users.js");
 
-/**
- * Sends a password reset email to the user
- */
-// exports.ForgetPasswordRequest = async (req, res, next) => {
-//   try {
-//     const { email } = req.params;
-//     const user = await User.findOne({ email }).select("+password");
 
-//     if (!user) {
-//       return next(new ErrorResponse("User does not exist", 404));
-//     }
-
-//     const secret = process.env.JWT_SECRET + user.password;
-//     const payload = { email: user.email, id: user._id };
-//     const token = jwt.sign(payload, secret, { expiresIn: "1h" });
-//     const link = `http://localhost:5173/auth/reset-password/?token=${token}&user=${user._id}`;
-
-//     // Await email sending and handle potential errors
-//     const emailResponse = await sendPasswordEmail(link, email, next);
-
-//     if (!emailResponse) {
-//       return next(new ErrorResponse("Failed to send reset email.", 500));
-//     }
-
-//     res.status(200).json({ success: true, message: "Password reset email sent." });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 exports.ForgetPasswordRequest = async (req, res, next) => {
   try {
-    const { email } = req.body; // Use body instead of params for POST
-    const user = await User.findOne({ email });
+    const { email } = req.body; // Using body instead of params
 
+    // Find user by email
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    }).select("+password");
     if (!user) {
       return next(new ErrorResponse("User does not exist", 404));
     }
 
     // Generate a unique reset token
     const secret = process.env.JWT_SECRET + user.password;
-    const payload = { email: user.email, id: user._id };
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+    const payload = {
+      email: user.email,
+      id: user._id,
+    };
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" }); // Expiry set to 1 hour
 
-    // Construct reset link
-    const link = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}`;
+    // Construct the reset password link
+    const link = `${req.protocol}://${req.get(
+      "host"
+    )}/reset-password/?token=${token}&user=${user._id}`;
 
-    // Send email
+    // Send password reset email
     const emailResponse = await sendPasswordEmail(link, email);
     if (!emailResponse) {
       return next(new ErrorResponse("Failed to send reset email.", 500));
@@ -58,7 +38,7 @@ exports.ForgetPasswordRequest = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ success: true, message: "Password reset email sent." });
+      .json({ success: true, message: "Password reset email sent" });
   } catch (error) {
     next(error);
   }
@@ -66,45 +46,56 @@ exports.ForgetPasswordRequest = async (req, res, next) => {
 
 
 exports.ForgetPasswordUpdate = async (req, res, next) => {
-  const { email, new_password } = req.body;
+  const { new_password, token, user_Id } = req.body; // All inputs from req.body
 
   try {
-    // Input validation
-    if (!email || !new_password) {
-      return next(
-        new ErrorResponse("Please provide email and new password", 400)
-      );
-    }
-
-    // Password validation
-    if (new_password.length < 8) {
-      return next(
-        new ErrorResponse("Password must be at least 8 characters long", 400)
-      );
-    }
-
-    // Find user by email
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-    }).select("+password");
-
+    // Find the user by ID
+    const user = await User.findOne({ _id: user_Id }).select("+password");
     if (!user) {
-      return next(new ErrorResponse("User not found", 404));
+      return next(new ErrorResponse("User does not exist", 404));
     }
 
-    // Hash and save new password
-    user.password = await bcrypt.hash(new_password, 10);
-    await user.save();
+    // Verify the token using the user's password as part of the secret
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET + user.password,
+      async (err, decodedToken) => {
+        if (err) {
+          return next(new ErrorResponse("Invalid or expired token", 401));
+        }
 
-    res.status(200).json({
-      success: true,
-      message: "Password updated successfully",
-    });
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(new_password, salt);
+
+        // Update the user's password
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: decodedToken.id },
+          { $set: { password: hashedPassword } },
+          { new: true }
+        );
+
+        // Handle success response
+        if (updatedUser) {
+          return res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+          });
+        } else {
+          return next(new ErrorResponse("Failed to update password", 500));
+        }
+      }
+    );
   } catch (error) {
-    console.error("Password reset error:", error);
     next(error);
   }
 };
+
+
+
+
+
+
 /**
  * Updates the authenticated user's password
  */

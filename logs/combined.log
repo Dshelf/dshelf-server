@@ -954,3 +954,16 @@
 {"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordRequest","timestamp":"2024-11-25T07:24:26.438Z"}
 {"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-25T07:25:06.036Z"}
 {"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-25T07:27:18.819Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordRequest","timestamp":"2024-11-25T07:30:45.848Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordRequest","timestamp":"2024-11-25T07:36:10.861Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordRequest","timestamp":"2024-11-28T12:29:50.199Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T12:32:52.019Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:01:33.923Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:01:36.875Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:05:25.252Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:05:26.358Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordRequest","timestamp":"2024-11-28T13:05:34.289Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:06:13.320Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:06:14.486Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:12:16.594Z"}
+{"level":"info","message":"POST /Dshelf/v1/user/forgetPasswordUpdate","timestamp":"2024-11-28T13:12:18.135Z"}
